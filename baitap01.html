@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bài 1: Danh sách sản phẩm</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      h2 {
+        text-align: center;
+        color: #333;
+      }
+      #backHome {
+        display: inline-block;
+        margin-bottom: 20px;
+        text-decoration: none;
+        color: #007bff;
+        font-weight: bold;
+      }
+      #backHome:hover {
+        text-decoration: underline;
+      }
+
+      #searchInput {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 20px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-size: 16px;
+      }
+      #searchInput:focus {
+        border-color: #007bff;
+        outline: none;
+      }
+
+      .grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+      }
+      .product-card {
+        border: 1px solid #eee;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s;
+      }
+      .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+      .product-card h3 {
+        margin: 0 0 10px 0;
+        font-size: 1.2rem;
+        color: #444;
+      }
+      .product-card p {
+        margin: 0;
+        font-weight: bold;
+        color: #ee4d2d;
+        font-size: 1.1rem;
+      }
+
+      .error-msg {
+        color: #dc3545;
+        font-style: italic;
+        text-align: center;
+        font-size: 18px;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="max-width: 1000px; margin: auto">
+      <h2>DỰ ÁN CÁC SẢN PHẨM CÔNG NGHỆ</h2>
+      <a id="backHome" href="index.html">&lt; Về trang chủ</a>
+
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Tên sản phẩm bạn cần tìm..."
+      />
+      <div id="productList" class="grid-container"></div>
+      <p id="errorMsg" class="error-msg" style="display: none">
+        Rất tiếc, chúng tôi không tìm thấy sản phẩm này!
+      </p>
+    </div>
+
+    <script>
+      // 1. Dữ liệu sản phẩm (Hơn 5 sản phẩm)
+      const products = [
+        {
+          id: 1,
+          name: "Điện thoại Samsung Galaxy S24 Ultra",
+          price: "29.990.000 đ",
+        },
+        {
+          id: 2,
+          name: "Điện thoại iPhone 15 Pro Max 256GB",
+          price: "33.500.000 đ",
+        },
+        {
+          id: 3,
+          name: "Tai nghe Bluetooth Marshall Major IV",
+          price: "3.690.000 đ",
+        },
+        {
+          id: 4,
+          name: "Bàn phím cơ không dây IQUNIX F97",
+          price: "4.200.000 đ",
+        },
+        {
+          id: 5,
+          name: "Chuột Gaming Logitech G Pro X Superlight 2",
+          price: "3.800.000 đ",
+        },
+        {
+          id: 6,
+          name: "Màn hình Dell UltraSharp U2723QE",
+          price: "12.500.000 đ",
+        },
+        {
+          id: 7,
+          name: "Máy tính bảng iPad Pro M2 11-inch",
+          price: "21.990.000 đ",
+        },
+      ];
+
+      // 2. Lấy các phần tử DOM
+      const listContainer = document.getElementById("productList");
+      const errorMsg = document.getElementById("errorMsg");
+      const searchInput = document.getElementById("searchInput");
+
+      // 3. Hàm hiển thị danh sách sản phẩm
+      function renderProducts(items) {
+        listContainer.innerHTML = ""; // Xóa sạch danh sách cũ
+
+        if (items.length === 0) {
+          // Hiển thị thông báo lỗi nếu không tìm thấy
+          errorMsg.style.display = "block";
+        } else {
+          // Ẩn thông báo lỗi và render từng sản phẩm
+          errorMsg.style.display = "none";
+          items.forEach((item) => {
+            // Tạo card sản phẩm
+            const card = document.createElement("div");
+            card.className = "product-card";
+
+            // Tạo tên sản phẩm (textContent để chống tấn công XSS)
+            const name = document.createElement("h3");
+            name.textContent = item.name;
+
+            // Tạo giá sản phẩm
+            const price = document.createElement("p");
+            price.textContent = `${item.price}`;
+
+            // Gắn tên và giá vào card, sau đó gắn card vào container chính
+            card.appendChild(name);
+            card.appendChild(price);
+            listContainer.appendChild(card);
+          });
+        }
+      }
+
+      // 4. Khởi chạy ban đầu để hiện toàn bộ sản phẩm
+      renderProducts(products);
+
+      // 5. Xử lý sự kiện tìm kiếm (Input)
+      searchInput.addEventListener("input", function (e) {
+        // Lấy từ khóa, chuyển sang chữ thường và xóa khoảng trắng thừa
+        const keyword = e.target.value.toLowerCase().trim();
+
+        // Lọc danh sách dựa trên từ khóa (không phân biệt hoa thường)
+        const filteredProducts = products.filter((p) => {
+          const productNameLowerCase = p.name.toLowerCase();
+          return productNameLowerCase.includes(keyword);
+        });
+
+        // Hiển thị danh sách đã lọc
+        renderProducts(filteredProducts);
+      });
+    </script>
+  </body>
+</html>
